@@ -32,6 +32,7 @@ class Thermometer
   end
 
   def solve(may_guess : Bool = true)
+    guesses_needed = 0
     until @cells_left == 0
       col_state = ->(n : UInt32) { @states.map { |s| s[n] } }
       col_coord = ->(mine : UInt32, theirs : UInt32) { {theirs, mine} }
@@ -51,11 +52,13 @@ class Thermometer
           # But no human would have time to do these!
           success ||= group_guess
           raise InconclusiveException.new unless success
+          guesses_needed += 1
         else
           raise InconclusiveException.new
         end
       end
     end
+    puts "#{guesses_needed} guesses needed." if @verbose && guesses_needed > 0
     @states.map(&.dup).to_a
   end
 
