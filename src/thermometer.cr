@@ -201,6 +201,10 @@ class Thermometer
     return false if choices.empty?
 
     most_useful = choices.min_by { |(coord, _)| nils[coord] }
+    if @verbose
+      num_most_useful = choices.count { |(coord, _)| nils[coord] == nils[most_useful[0]] }
+      puts "#{num_most_useful} are the most useful."
+    end
     self[most_useful[0]] = most_useful[1]
     check_thermometers([@grid[most_useful[0][0]][most_useful[0][1]][0]])
 
