@@ -1,4 +1,4 @@
-(1..50).each { |n|
+(1..60).each { |n|
   id = '%03d' % n.to_i
   lines = `curl https://www.janko.at/Raetsel/Thermometer/#{id}.a.htm`.lines
   File.open(id, ?w) { |f|
