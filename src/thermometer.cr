@@ -1,3 +1,9 @@
+enum GuessStrategy
+  Single
+  Group
+  None
+end
+
 class InconclusiveException < Exception; end
 
 class ContradictionException < Exception; end
@@ -13,12 +19,13 @@ class Thermometer
   @grid : Array(Array(Cell))
   @thermometers = Hash(ThermometerID, Array(Coordinate)).new { |h, k| h[k] = [] of Coordinate }
 
-  def initialize(@cols : Array(Int32), @rows : Array(Int32), @grid = Array(Array(Cell)), @verbose : Bool = false)
+  def initialize(@cols : Array(Int32), @rows : Array(Int32), @grid = Array(Array(Cell)), @guess_strategy = GuessStrategy::Single, @verbose : Bool = false)
     @states = Array(Array(Bool?)).new(@rows.size) { Array(Bool?).new(@cols.size, nil) }
     @change = Array(Array(Bool)).new(@rows.size) { Array(Bool).new(@cols.size, false) }
     @cell_width = @grid.map { |r| r.map { |t, x| "#{t}.#{x}".size }.max }.max.to_u32
     @left_width = @rows.map { |c| c ? c.to_s.size : 1 }.max.to_u32
     @cells_left = (@cols.size * @rows.size).to_u32
+    @guess_strategy = guess_strategy
     @grid.each_with_index { |row, y|
       y = y.to_u32
       row.each_with_index { |(thermometer, pos), x|
@@ -45,12 +52,11 @@ class Thermometer
       if !cols && !rows
         if may_guess
           success = false
-          # single cell guess is OK to emulate a human, and is sufficient for all.
-          # Maybe let the caller configure to use it.
-          success ||= single_cell_guess
           # Hasn't been a puzzle that needed a group infer, but it's fun to watch.
           # But no human would have time to do these!
-          success ||= group_guess
+          success ||= group_guess if @guess_strategy == GuessStrategy::Group
+          # single cell guess is OK to emulate a human, and is sufficient for all.
+          success ||= single_cell_guess if @guess_strategy == GuessStrategy::Single
           raise InconclusiveException.new unless success
           guesses_needed += 1
         else

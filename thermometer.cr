@@ -1,5 +1,6 @@
 require "./src/thermometer"
 
+group_guess = ARGV.delete("-g")
 test = ARGV.delete("-t")
 
 lines = ARGF.each_line.to_a
@@ -16,6 +17,7 @@ if test
   }
 end
 
-solved = Thermometer.new(cols, rows, board, verbose: !test).solve
+strategy = group_guess ? GuessStrategy::Group : GuessStrategy::Single
+solved = Thermometer.new(cols, rows, board, guess_strategy: strategy, verbose: !test).solve
 
 solved.each { |x| puts x.to_s + "," } if test
